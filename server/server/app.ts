@@ -16,8 +16,10 @@ interface Data {
   employees: string[];
 }
 
-export const dataPath = path.resolve(__dirname, "../lib/database.json");
-const PORT = process.env.PORT || 3010;
+export const dataPath = path.resolve(__dirname, "../lib/database.json"); //setting up promise to resolve a data
+const PORT = process.env.PORT || 3010; // setting up a port and environment variable
+
+// Implementing and setting up server
 export const server: Server = http.createServer(
   async (req: IncomingMessage, res: ServerResponse) => {
     switch (req.method) {
@@ -28,19 +30,19 @@ export const server: Server = http.createServer(
           datas = JSON.parse(datas);
           let body = "";
           req.on("data", (chunk) => {
-            body += chunk.toString();
+            body += chunk.toString(); //converting buffer into a string
           });
           req.on("end", () => {
             datas.push(JSON.parse(body));
             writeData(datas);
-            sendData(res, 200);
+            sendData(res, 201);
           });
         }
         break;
       case "PUT":
         //Put method should be routed to /edit/:id
-        if (req.url?.match(/\/edit\/\d+/)) {
-          const idNum: number = +req.url?.split("edit/")[1]!;
+        if (req.url?.match(/\/edit\/\d+/)) { //to check if it matches the api in the url
+          const idNum: number = +req.url?.split("edit/")[1]!; // check the api and using the split method to convert the string into an array
           let datas: any = await getDatas();
           datas = JSON.parse(datas);
           let index = datas.findIndex((item: Data) => item["id"] === idNum);
@@ -50,9 +52,9 @@ export const server: Server = http.createServer(
           });
           req.on("end", () => {
             const bodyParsed = JSON.parse(body);
-            datas[index] = { ...datas[index], ...bodyParsed };
+            datas[index] = { ...datas[index], ...bodyParsed }; // writing into the body and getting data from the body of the database.
             writeData(datas);
-            sendData(res, 200);
+            sendData(res, 201);
           });
         }
         break;
@@ -62,7 +64,7 @@ export const server: Server = http.createServer(
           const idNum: number = +req.url?.split("delete/")[1]!;
           let datas: any = await getDatas();
           datas = JSON.parse(datas);
-          let index = datas.findIndex((item: Data) => item["id"] === idNum);
+          let index = datas.findIndex((item: Data) => item["id"] === idNum); 
           let body: string = "";
           req.on("data", (chunk) => {
             body += chunk.toString();
@@ -86,12 +88,12 @@ const getDatas = async () => {
   try {
     return fs.readFileSync(dataPath, { encoding: "utf8", flag: "r" });
   } catch (error) {
-    fs.writeFileSync(dataPath, JSON.stringify([]));
+    fs.writeFileSync(dataPath, JSON.stringify([])); // writing into the body of the database
     return fs.readFileSync(dataPath, { encoding: "utf8", flag: "r" });
   }
 };
 const writeData = (data: string) => {
-  fs.writeFileSync(dataPath, JSON.stringify(data));
+  fs.writeFileSync(dataPath, JSON.stringify (data));
 };
 const sendData = async (response: ServerResponse, status: number) => {
   const datas = await getDatas();
